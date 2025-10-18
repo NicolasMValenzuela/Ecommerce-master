@@ -1,22 +1,29 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import loadVehiclesWithImages from '../data/autos'; // <--- Importa la función correcta
+import { useVehicles } from '../context/VehiclesContext'; // <--- Usa el Context
 
 const Inicio = () => {
-  const [autos, setAutos] = useState([]);
-
-  useEffect(() => {
-    const loadVehicles = async () => {
-      const vehicles = await loadVehiclesWithImages();
-      setAutos(vehicles);
-    };
-
-    loadVehicles();
-  }, []);
+  const { vehicles, loading, error } = useVehicles(); // <--- Obtén datos del Context
 
   // Puedes mostrar solo algunos autos destacados si quieres:
-  const featuredCars = autos.slice(0, 3);
+  const featuredCars = vehicles.slice(0, 3);
+
+  // Mostrar loading o error si es necesario
+  if (loading) {
+    return (
+      <div className="bg-white text-gray-900 min-h-screen pt-24 flex justify-center items-center">
+        <div className="text-xl">Cargando vehículos destacados...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white text-gray-900 min-h-screen pt-24 flex justify-center items-center">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white text-gray-900 min-h-screen pt-24">
@@ -34,8 +41,8 @@ const Inicio = () => {
       <div className="p-10">
         <h2 className="text-2xl font-bold mb-6">Autos Destacados</h2>
         <div className="grid md:grid-cols-3 gap-6">
-          {featuredCars.map((car) => (
-            <div key={car.idVehiculo} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow hover:shadow-lg transition">
+          {featuredCars.map((car, index) => (
+            <div key={`featured-car-${car.idVehiculo || car.id || index}`} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow hover:shadow-lg transition">
               {car.imageUrl ? (
                 <img 
                   src={car.imageUrl} 
@@ -50,10 +57,10 @@ const Inicio = () => {
                 </div>
               )}
               <div className="p-4">
-                <h3 className="text-xl font-semibold">{car.marca} {car.modelo} {car.año}</h3>
+                <h3 className="text-xl font-semibold">{car.marca} {car.modelo} {car.anio}</h3>
                 <p className="text-gray-500 mb-4">KM: {car.kilometraje.toLocaleString()}</p>
                 <Link
-                  to={`/catalogo/${car.idVehiculo}`}
+                  to={`/catalogo/${car.idVehiculo || car.id}`}
                   className="inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition"
                 >
                   Ver Más

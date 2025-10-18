@@ -10,23 +10,26 @@ import Registrarse from "./Views/Registrarse";
 import AutoDetalle from "./Views/AutoDetalle";
 import Carrito from "./Views/Carrito";
 import { CarritoProvider } from "./context/CarritoContext";
+import { VehiclesProvider } from "./context/VehiclesContext";
 
 function App() {
   return (
-    <CarritoProvider>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Inicio />} />
-        <Route path="/catalogo" element={<Catalogo />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/contacto" element={<Contacto />} />
-        <Route path="/Inicio" element={<Inicio />} />
-        <Route path="/Nosotros" element={<AboutUs />} />
-        <Route path="/registrarse" element={<Registrarse />} />
-        <Route path="/catalogo/:id" element={<AutoDetalle />} />
-        <Route path="/carrito" element={<Carrito />} />
-      </Routes>
-    </CarritoProvider>
+    <VehiclesProvider>
+      <CarritoProvider>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/catalogo" element={<Catalogo />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/contacto" element={<Contacto />} />
+          <Route path="/Inicio" element={<Inicio />} />
+          <Route path="/Nosotros" element={<AboutUs />} />
+          <Route path="/registrarse" element={<Registrarse />} />
+          <Route path="/catalogo/:id" element={<AutoDetalle />} />
+          <Route path="/carrito" element={<Carrito />} />
+        </Routes>
+      </CarritoProvider>
+    </VehiclesProvider>
   );
 }
 

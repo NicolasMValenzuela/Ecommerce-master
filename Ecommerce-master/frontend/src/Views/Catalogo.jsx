@@ -1,57 +1,41 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import Card from "../components/Card";
-import loadVehiclesWithImages from "../data/autos";
+import { useVehicles } from "../context/VehiclesContext";
 
 
 const Catalogo = () => {
-  // ✅ TODOS LOS HOOKS AL PRINCIPIO - ESTA ES LA REGLA FUNDAMENTAL DE REACT
-  const [autos, setAutos] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null);
+  // ✅ Usar el Context en lugar de estado local
+  const { vehicles: autos, loading, error } = useVehicles();
+  
+  // ✅ Estados para filtros
   const [orden, setOrden] = useState(""); 
   const [busqueda, setBusqueda] = useState("");
   const [marcaSeleccionada, setMarcaSeleccionada] = useState("");
   const [modeloSeleccionado, setModeloSeleccionado] = useState("");
   const [añoSeleccionado, setAñoSeleccionado] = useState("");
   const [precioRango, setPrecioRango] = useState(""); 
-  const [kilometrajeRango, setKilometrajeRango] = useState(""); 
+  const [kilometrajeRango, setKilometrajeRango] = useState("");
 
-  // ✅ useEffect también debe ir antes de los returns
-  useEffect(() => {
-    const loadVehicles = async () => {
-      try {
-        setLoading(true);
-        const vehicles = await loadVehiclesWithImages();
-        setAutos(vehicles);
-        setError(null);
-      } catch (err) {
-        setError('Error al cargar vehículos');
-        setAutos([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadVehicles();
-  }, []);
-
-  // ✅ useMemo también son hooks - DEBEN ir antes de los returns
-  const marcas = useMemo(() => 
-    Array.from(new Set(autos.map((a) => a.marca))).sort(), 
-    [autos]
-  );
+  // ✅ useMemo optimizados - solo recalcular cuando autos realmente cambie
+  const marcas = useMemo(() => {
+    if (!autos.length) return [];
+    return Array.from(new Set(autos.map((a) => a.marca))).sort();
+  }, [autos]);
   
-  const modelos = useMemo(() => 
-    Array.from(new Set(autos.map((a) => a.modelo))).sort(), 
-    [autos]
-  );
+  const modelos = useMemo(() => {
+    if (!autos.length) return [];
+    return Array.from(new Set(autos.map((a) => a.modelo))).sort();
+  }, [autos]);
   
-  const años = useMemo(() => 
-    Array.from(new Set(autos.map((a) => a.anio))).sort((a, b) => b - a), 
-    [autos]
-  );
+  const años = useMemo(() => {
+    if (!autos.length) return [];
+    return Array.from(new Set(autos.map((a) => a.anio))).sort((a, b) => b - a);
+  }, [autos]);
 
+  // ✅ Optimización: solo recalcular si hay cambios reales
   const autosFiltrados = useMemo(() => {
+    if (!autos.length) return [];
+    
     let filtered = autos.filter((auto) => {
       const coincideBusqueda =
         auto.marca.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -159,8 +143,8 @@ const Catalogo = () => {
               onChange={(e) => setMarcaSeleccionada(e.target.value)}
             >
                 <option value="">Marca</option>
-                {marcas.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                {marcas.map((m, index) => (
+                  <option key={`marca-${m}-${index}`} value={m}>{m}</option>
                 ))}
             </select>
             <select
@@ -169,8 +153,8 @@ const Catalogo = () => {
               onChange={(e) => setModeloSeleccionado(e.target.value)}
             >
                 <option value="">Modelo</option>
-                {modelos.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                {modelos.map((m, index) => (
+                  <option key={`modelo-${m}-${index}`} value={m}>{m}</option>
                 ))}
             </select>
             <select className="p-2 border border-gray-300 rounded bg-white"
@@ -178,8 +162,8 @@ const Catalogo = () => {
                 onChange={(e) => setAñoSeleccionado(e.target.value)}
             >
                 <option value="">Año</option>
-                {años.map((a) => (
-                  <option key={a} value={a}>{a}</option>
+                {años.map((a, index) => (
+                  <option key={`año-${a}-${index}`} value={a}>{a}</option>
                 ))}
             </select>
             <select
@@ -188,8 +172,8 @@ const Catalogo = () => {
               onChange={(e) => setPrecioRango(e.target.value)}
             >
               <option value="">Precio</option>
-              {priceRanges.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
+              {priceRanges.map((r, index) => (
+                <option key={`precio-${r.value}-${index}`} value={r.value}>{r.label}</option>
               ))}
             </select>
             <select
@@ -198,8 +182,8 @@ const Catalogo = () => {
               onChange={(e) => setKilometrajeRango(e.target.value)}
             >
               <option value="">Kilometraje</option>
-              {kmRangos.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
+              {kmRangos.map((r, index) => (
+                <option key={`km-${r.value}-${index}`} value={r.value}>{r.label}</option>
               ))}
             </select>
         </section>
@@ -219,17 +203,11 @@ const Catalogo = () => {
         Menor KM
       </button>
             </div>
-    <div className="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
-      {autosFiltrados.length === 0 ? (
-        <div className="col-span-4 text-center text-red-600 font-semibold text-lg p-8">
-          No se encontraron autos que coincidan con los criterios seleccionados.
-        </div>
-      ) : (
-        autosFiltrados.map((auto) => (
-          <Card key={auto.idVehiculo} auto={auto} />
-        ))
-      )}
-    </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {autosFiltrados.map((vehiculo) => (
+          <Card key={`vehiculo-${vehiculo.id}`} vehiculo={vehiculo} />
+        ))}
+      </div>
     </div>
   );
 };
