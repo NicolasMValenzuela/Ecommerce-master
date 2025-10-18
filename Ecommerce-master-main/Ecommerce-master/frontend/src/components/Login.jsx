@@ -4,7 +4,7 @@ import { useCarrito } from '../context/CarritoContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(''); // El estado ya existía, ahora lo usaremos
   const { login } = useCarrito();
   const navigate = useNavigate();
 
@@ -47,7 +47,19 @@ const Login = () => {
               required
             />
           </div>
-          {/* ...el input de la contraseña se mantiene igual... */}
+          
+          {/* CAMPO DE CONTRASEÑA AGREGADO */}
+          <div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Contraseña"
+              className="w-full border p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
