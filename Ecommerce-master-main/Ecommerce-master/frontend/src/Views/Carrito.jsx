@@ -39,11 +39,11 @@ export default function Carrito() {
       ) : (
         <>
           <ul>
-            {carrito.items.map((item) => (
-              <li key={item.id} className="flex items-center justify-between mb-4">
+            {carrito.items.map((item, index) => (
+              <li key={`carrito-item-${item.vehiculoId}-${index}`} className="flex items-center justify-between mb-4">
                 <div>
                   <span className="font-semibold">Vehículo ID: {item.vehiculoId}</span>
-                  <span className="ml-4 text-gray-500">Valor: ${item.valor.toFixed(2)}</span>
+                  <span className="ml-4 text-gray-500">Valor: ${item.valor?.toFixed(2) || '0.00'}</span>
                 </div>
                 <button
                   className="text-red-500 hover:underline"

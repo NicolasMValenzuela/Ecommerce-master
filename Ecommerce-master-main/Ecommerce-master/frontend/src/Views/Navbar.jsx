@@ -4,8 +4,8 @@ import { useCarrito } from '../context/CarritoContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // Obtenemos los nuevos valores del contexto
-  const { carrito, isAuthenticated, logout } = useCarrito(); 
+  // Obtenemos los nuevos valores del contexto incluyendo user
+  const { carrito, user, isAuthenticated, logout } = useCarrito(); 
   const navigate = useNavigate();
 
   const toggleMenu = () => {
@@ -42,6 +42,32 @@ const Navbar = () => {
             
             {isAuthenticated ? (
               <>
+                {/* Información del usuario y dropdown para ADMIN */}
+                {user && (
+                  <li className="flex items-center space-x-3">
+                    <span className="text-gray-300 text-sm">
+                      Hola, {user.firstName}
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      user.role === 'ADMIN' 
+                        ? 'bg-red-100 text-red-800' 
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {user.role === 'ADMIN' ? 'VENDEDOR' : 'CLIENTE'}
+                    </span>
+                    
+                    {/* Botón de gestión solo para ADMIN */}
+                    {user.role === 'ADMIN' && (
+                      <Link 
+                        to="/admin/vehiculos" 
+                        className="bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 transition-colors"
+                      >
+                        Gestionar Vehículos
+                      </Link>
+                    )}
+                  </li>
+                )}
+                
                 <li>
                   <button onClick={handleLogout} className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                     Logout
@@ -137,6 +163,35 @@ const Navbar = () => {
             
             {isAuthenticated ? (
               <>
+                {/* Información del usuario en móvil */}
+                {user && (
+                  <div className="px-3 py-2 border-b border-gray-700 mb-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-sm">
+                        Hola, {user.firstName}
+                      </span>
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                        user.role === 'ADMIN' 
+                          ? 'bg-red-100 text-red-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {user.role === 'ADMIN' ? 'VENDEDOR' : 'CLIENTE'}
+                      </span>
+                    </div>
+                    
+                    {/* Gestión para ADMIN en móvil */}
+                    {user.role === 'ADMIN' && (
+                      <Link
+                        to="/admin/vehiculos"
+                        onClick={closeMenu}
+                        className="mt-2 block bg-gray-700 text-white px-3 py-2 rounded text-sm hover:bg-gray-600 transition-colors"
+                      >
+                        Gestionar Vehículos
+                      </Link>
+                    )}
+                  </div>
+                )}
+                
                 <Link
                   to="/carrito"
                   onClick={closeMenu}

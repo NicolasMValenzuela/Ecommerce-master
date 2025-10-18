@@ -36,6 +36,7 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 .requestMatchers(HttpMethod.GET, "/vehicles/**").permitAll() 
                 .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/categories").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                 .requestMatchers("/carritos/**").authenticated()
                 .anyRequest().authenticated())
         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))

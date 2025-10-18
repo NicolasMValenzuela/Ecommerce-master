@@ -42,6 +42,7 @@ export default function AutoDetalle() {
       <h2 className="text-2xl font-bold mb-2">{auto.marca} {auto.modelo} ({auto.anio})</h2>
       <p className="mb-2 text-gray-700">Kilometraje: {auto.kilometraje.toLocaleString()} km</p>
       <p className="mb-4 font-semibold">Precio: ${auto.precioBase.toLocaleString()}</p>
+      <p className="mb-4 text-gray-600">{auto.category.description}</p>
       <p className="mb-4 font-semibold">Stock: {sinStock ? "Agotado" : `${auto.stock} unidades`}</p>
       
       <button
