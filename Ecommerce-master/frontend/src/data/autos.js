@@ -4,7 +4,6 @@ const fetchVehicles = async () => {
     const response = await fetch('http://localhost:4002/vehicles', {
       method: 'GET',
       headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbjMiLCJpYXQiOjE3NjA3MTI5NDQsImV4cCI6MTc2MDc5OTM0NH0._MOgFSQwEUFowr3KQzon23Qn-Nik5VBbNUOJcRCj_lDYDybjGi3GljmWWaXdLQ_jamZGHLOmv4vu1Q34r4v0wA',
         'Content-Type': 'application/json'
       }
     });
@@ -28,7 +27,7 @@ const getVehicleImage = async (vehicleId) => {
   try {
     const response = await fetch(`http://localhost:4002/vehicles/${vehicleId}/image`, {
       headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbjMiLCJpYXQiOjE3NjA3MTI5NDQsImV4cCI6MTc2MDc5OTM0NH0._MOgFSQwEUFowr3KQzon23Qn-Nik5VBbNUOJcRCj_lDYDybjGi3GljmWWaXdLQ_jamZGHLOmv4vu1Q34r4v0wA'
+        
       }
     });
     
