@@ -98,6 +98,7 @@ public class CarritoServiceImpl implements CarritoService {
             throw new RuntimeException("El carrito está vacío, no se puede generar un pedido.");
         }
 
+        // 1. Validar stock y actualizarlo (esto ya lo tenías bien)
         for (CarritoVehiculo item : carrito.getCarritoVehiculos()) {
             Vehiculo vehiculo = item.getVehiculo();
             int cantidadPedida = item.getCantidad();
@@ -112,19 +113,22 @@ public class CarritoServiceImpl implements CarritoService {
         carrito.setEstado("CONFIRMADO");
         carritoRepository.save(carrito);
 
+        // 2. Calcular subtotal sin descuento
         double subtotal = carrito.getCarritoVehiculos().stream()
             .mapToDouble(item -> item.getValor() * item.getCantidad())
             .sum();
 
+        // 3. --- LÓGICA DE DESCUENTO AGREGADA ---
         double costoFinal = subtotal;
         switch (formaDePago.getFormaDePago()) {
             case EFECTIVO:
-                costoFinal *= 0.90;
+                costoFinal *= 0.90; // Aplicamos 10% de descuento
                 break;
             case TRANSFERENCIA:
-                costoFinal *= 0.95;
+                costoFinal *= 0.95; // Aplicamos 5% de descuento
                 break;
             case TARJETA:
+                // No se aplica descuento
                 break;
         }
         
@@ -132,18 +136,18 @@ public class CarritoServiceImpl implements CarritoService {
             .map(CarritoVehiculo::getVehiculo)
             .collect(Collectors.toList());
 
+        // 4. Construir el pedido con el costoFinal ya calculado
         Pedido pedido = Pedido.builder()
             .cliente(carrito.getCliente())
             .vehiculos(vehiculosDelPedido)
-            .costoTotal(costoFinal)
+            .costoTotal(costoFinal) // Usamos el costo con el descuento aplicado
             .formaDePago(formaDePago)
-            .fechaDeCreacion(LocalDateTime.now())
             .estado("PENDIENTE_PAGO")
             .build();
 
         return pedidoRepository.save(pedido);
     }
-
+    
     @Override
     @Transactional
     public Carrito getOrCreateCarritoForUser(User user) {
