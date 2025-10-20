@@ -8,6 +8,26 @@ export default function Carrito() {
   const navigate = useNavigate();
   const [formaDePago, setFormaDePago] = useState("TARJETA");
 
+  // --- LÓGICA DE CÁLCULO EN TIEMPO REAL ---
+  const { subtotal, descuento, total } = useMemo(() => {
+    if (!carrito || !carrito.items || carrito.items.length === 0) {
+      return { subtotal: 0, descuento: 0, total: 0 };
+    }
+
+    const sub = carrito.items.reduce((acc, item) => acc + (item.valor || 0), 0);
+    
+    let desc = 0;
+    if (formaDePago === 'EFECTIVO') {
+      desc = sub * 0.10; // 10% de descuento
+    } else if (formaDePago === 'TRANSFERENCIA') {
+      desc = sub * 0.05; // 5% de descuento
+    }
+    
+    const tot = sub - desc;
+
+    return { subtotal: sub, descuento: desc, total: tot };
+  }, [carrito, formaDePago]);
+
   const handleCheckout = () => {
     if (!carrito || !carrito.idCarrito) return;
     
