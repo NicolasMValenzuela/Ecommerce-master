@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useCarrito } from "../context/CarritoContext";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchConToken } from "../api/api";
@@ -7,6 +7,8 @@ export default function Carrito() {
   const { carrito, quitarDelCarrito, isAuthenticated, user } = useCarrito();
   const navigate = useNavigate();
   const [formaDePago, setFormaDePago] = useState("TARJETA");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // --- LÓGICA DE CÁLCULO EN TIEMPO REAL ---
   const { subtotal, descuento, total } = useMemo(() => {
@@ -28,10 +30,13 @@ export default function Carrito() {
     return { subtotal: sub, descuento: desc, total: tot };
   }, [carrito, formaDePago]);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!carrito || !carrito.idCarrito) return;
     
-    const datosCheckout = { formaDePago: formaDePago }; 
+    setIsProcessing(true);
+    
+    try {
+      const formaDePagoObj = { formaDePago: formaDePago }; 
 
       const pedidoGenerado = await fetchConToken(
         `/carritos/${carrito.idCarrito}/checkout`, 
