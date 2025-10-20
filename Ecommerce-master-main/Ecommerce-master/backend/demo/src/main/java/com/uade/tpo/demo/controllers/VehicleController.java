@@ -85,21 +85,24 @@ public class VehicleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Vehiculo> updateVehicle(@PathVariable Long id, @RequestBody Vehiculo vehicleDetails) {
-        return vehicleService.getVehicleById(id).map(vehicle -> {
-            vehicle.setMarca(vehicleDetails.getMarca());
-            vehicle.setModelo(vehicleDetails.getModelo());
-            vehicle.setColor(vehicleDetails.getColor());
-            vehicle.setAnio(vehicleDetails.getAnio());
-            vehicle.setKilometraje(vehicleDetails.getKilometraje());
-            vehicle.setPrecioBase(vehicleDetails.getPrecioBase());
-            vehicle.setStock(vehicleDetails.getStock());
-            vehicle.setCategory(vehicleDetails.getCategory());
+public ResponseEntity<Vehiculo> updateVehicle(@PathVariable Long id, @RequestBody Vehiculo vehicleDetails) {
+    return vehicleService.getVehicleById(id).map(vehicle -> {
+        vehicle.setMarca(vehicleDetails.getMarca());
+        vehicle.setModelo(vehicleDetails.getModelo());
+        vehicle.setColor(vehicleDetails.getColor());
+        vehicle.setAnio(vehicleDetails.getAnio());
+        vehicle.setKilometraje(vehicleDetails.getKilometraje());
+        vehicle.setPrecioBase(vehicleDetails.getPrecioBase());
+        vehicle.setStock(vehicleDetails.getStock());
+        vehicle.setCategory(vehicleDetails.getCategory());
+        vehicle.setNumeroChasis(vehicleDetails.getNumeroChasis());
+        vehicle.setNumeroMotor(vehicleDetails.getNumeroMotor());
 
-            Vehiculo updatedVehicle = vehicleService.saveVehicle(vehicle);
-            return ResponseEntity.ok(updatedVehicle);
-        }).orElse(ResponseEntity.notFound().build());
-    }
+        Vehiculo updatedVehicle = vehicleService.saveVehicle(vehicle);
+        return ResponseEntity.ok(updatedVehicle);
+    }).orElse(ResponseEntity.notFound().build());
+}
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {

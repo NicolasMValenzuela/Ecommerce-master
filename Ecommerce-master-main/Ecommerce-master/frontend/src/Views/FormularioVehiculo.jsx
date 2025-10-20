@@ -181,16 +181,33 @@ const FormularioVehiculo = () => {
 
       let response;
       if (isEditing) {
-        // Para edición, usar PUT
+        const vehicleData = {
+          marca: formData.marca.trim(),
+          modelo: formData.modelo.trim(),
+          color: formData.color.trim(),
+          numeroChasis: parseInt(formData.numeroChasis),
+          numeroMotor: parseInt(formData.numeroMotor),
+          precioBase: parseFloat(formData.precioBase),
+          stock: parseInt(formData.stock),
+          anio: parseInt(formData.anio),
+          kilometraje: parseInt(formData.kilometraje) || 0,
+          category: { id: parseInt(formData.categoryId) }
+        };
+
         response = await fetch(`http://localhost:4002/vehicles/${id}`, {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'Content-Type': 'application/json'
           },
-          body: formDataToSend
+          body: JSON.stringify(vehicleData)
         });
       } else {
-        // Para creación, usar POST
+        // POST con FormData para incluir imagen
+        const formDataToSend = new FormData();
+        formDataToSend.append('vehicle', JSON.stringify(vehicleData));
+        if (imageFile) formDataToSend.append('image', imageFile);
+
         response = await fetch('http://localhost:4002/vehicles', {
           method: 'POST',
           headers: {
@@ -199,6 +216,7 @@ const FormularioVehiculo = () => {
           body: formDataToSend
         });
       }
+
 
       if (response.ok) {
         alert(isEditing ? 'Vehículo actualizado exitosamente' : 'Vehículo creado exitosamente');

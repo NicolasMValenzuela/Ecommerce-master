@@ -33,7 +33,7 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(req -> req.requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/error/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/vehicles/**").permitAll() 
+                .requestMatchers(HttpMethod.GET, "/vehicles/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/categories").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
