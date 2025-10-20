@@ -112,10 +112,22 @@ public class CarritoServiceImpl implements CarritoService {
         carrito.setEstado("CONFIRMADO");
         carritoRepository.save(carrito);
 
-        double total = carrito.getCarritoVehiculos().stream()
+        double subtotal = carrito.getCarritoVehiculos().stream()
             .mapToDouble(item -> item.getValor() * item.getCantidad())
             .sum();
-            
+
+        double costoFinal = subtotal;
+        switch (formaDePago.getFormaDePago()) {
+            case EFECTIVO:
+                costoFinal *= 0.90;
+                break;
+            case TRANSFERENCIA:
+                costoFinal *= 0.95;
+                break;
+            case TARJETA:
+                break;
+        }
+        
         List<Vehiculo> vehiculosDelPedido = carrito.getCarritoVehiculos().stream()
             .map(CarritoVehiculo::getVehiculo)
             .collect(Collectors.toList());
@@ -123,7 +135,7 @@ public class CarritoServiceImpl implements CarritoService {
         Pedido pedido = Pedido.builder()
             .cliente(carrito.getCliente())
             .vehiculos(vehiculosDelPedido)
-            .costoTotal(total)
+            .costoTotal(costoFinal)
             .formaDePago(formaDePago)
             .fechaDeCreacion(LocalDateTime.now())
             .estado("PENDIENTE_PAGO")
