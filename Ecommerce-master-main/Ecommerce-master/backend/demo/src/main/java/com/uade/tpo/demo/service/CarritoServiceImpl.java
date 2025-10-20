@@ -1,5 +1,13 @@
 package com.uade.tpo.demo.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.uade.tpo.demo.entity.Carrito;
 import com.uade.tpo.demo.entity.CarritoVehiculo;
 import com.uade.tpo.demo.entity.FormaDePago;
@@ -9,17 +17,9 @@ import com.uade.tpo.demo.entity.Vehiculo;
 import com.uade.tpo.demo.repository.CarritoRepository;
 import com.uade.tpo.demo.repository.CarritoVehiculoRepository;
 import com.uade.tpo.demo.repository.PedidoRepository;
+import com.uade.tpo.demo.repository.VehicleRepository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.transaction.annotation.Transactional;
-
-import com.uade.tpo.demo.repository.VehicleRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -125,6 +125,7 @@ public class CarritoServiceImpl implements CarritoService {
             .vehiculos(vehiculosDelPedido)
             .costoTotal(total)
             .formaDePago(formaDePago)
+            .fechaDeCreacion(LocalDateTime.now())
             .estado("PENDIENTE_PAGO")
             .build();
 

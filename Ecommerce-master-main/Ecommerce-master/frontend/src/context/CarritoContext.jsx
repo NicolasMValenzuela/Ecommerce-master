@@ -20,7 +20,7 @@ const decodeJWT = (token) => {
 };
 
 export function CarritoProvider({ children }) {
-  const [carrito, setCarrito] = useState(null);
+  const [carrito, setCarrito] = useState({ items: [], isLoading: true });
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
 
@@ -59,6 +59,7 @@ export function CarritoProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
+    
     if (isAuthenticated && token) {
       // Obtener datos del usuario
       fetchUserData(token);
@@ -66,19 +67,55 @@ export function CarritoProvider({ children }) {
       // Obtener carrito
       fetchConToken('/carritos/mine')
         .then(data => {
+          console.log('Respuesta del carrito:', data);
           const items = data?.items || [];
           const itemsMapeados = items.map(item => ({
               ...item,
-              id: item.vehiculoId,
+              id: item.id || item.vehiculoId, // Usar id primero, luego vehiculoId como fallback
           }));
-          setCarrito({ ...data, items: itemsMapeados });
+          setCarrito({ 
+            ...data, 
+            items: itemsMapeados,
+            isLoading: false,
+            error: null
+          });
         })
         .catch(error => {
           console.error("Error al cargar el carrito:", error);
-          setCarrito({ items: [] });
+          
+          // Manejo específico de errores
+          if (error.message.includes('No se pudo conectar')) {
+            console.warn('Backend no disponible, creando carrito temporal');
+            setCarrito({ 
+              items: [], 
+              isLoading: false,
+              error: 'backend_offline' 
+            });
+          } else if (error.message.includes('No autorizado')) {
+            console.warn('Token inválido, redirigiendo a login');
+            setIsAuthenticated(false);
+            localStorage.removeItem('accessToken');
+            setCarrito({ 
+              items: [], 
+              isLoading: false,
+              error: 'unauthorized' 
+            });
+          } else {
+            // Error general, carrito vacío pero funcional
+            setCarrito({ 
+              items: [], 
+              isLoading: false,
+              error: error.message 
+            });
+          }
         });
     } else {
-      setCarrito(null);
+      // Usuario no autenticado
+      setCarrito({ 
+        items: [], 
+        isLoading: false,
+        error: null 
+      });
       setUser(null);
     }
   }, [isAuthenticated]);
@@ -93,11 +130,14 @@ export function CarritoProvider({ children }) {
     localStorage.removeItem('accessToken');
     setIsAuthenticated(false);
     setUser(null);
-    setCarrito(null);
+    setCarrito({ items: [], isLoading: false, error: null });
   };
 
   const agregarAlCarrito = (auto) => {
-    if (!isAuthenticated || !carrito) return;
+    if (!isAuthenticated || !carrito || !carrito.idCarrito) {
+      console.warn('No se puede agregar al carrito: usuario no autenticado o carrito no disponible');
+      return;
+    }
 
     const itemParaApi = {
       vehiculo: { idVehiculo: auto.idVehiculo },
@@ -107,14 +147,30 @@ export function CarritoProvider({ children }) {
 
     fetchConToken(`/carritos/${carrito.idCarrito}/items`, 'POST', itemParaApi)
       .then(carritoActualizado => {
-        setCarrito(carritoActualizado);
+        const items = carritoActualizado?.items || [];
+        const itemsMapeados = items.map(item => ({
+            ...item,
+            id: item.id || item.vehiculoId,
+        }));
+        setCarrito({ 
+          ...carritoActualizado, 
+          items: itemsMapeados,
+          isLoading: false,
+          error: null
+        });
         alert(`${auto.marca} ${auto.modelo} agregado al carrito!`);
       })
-      .catch(error => console.error("Error al agregar al carrito:", error));
+      .catch(error => {
+        console.error("Error al agregar al carrito:", error);
+        alert(`Error al agregar al carrito: ${error.message}`);
+      });
   };
 
   const quitarDelCarrito = (itemId) => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !carrito) {
+      console.warn('No se puede quitar del carrito: usuario no autenticado o carrito no disponible');
+      return;
+    }
 
     fetchConToken(`/carritos/items/${itemId}`, 'DELETE')
       .then(() => {
@@ -123,7 +179,10 @@ export function CarritoProvider({ children }) {
           items: prev.items.filter(item => item.id !== itemId)
         }));
       })
-      .catch(error => console.error("Error al quitar del carrito:", error));
+      .catch(error => {
+        console.error("Error al quitar del carrito:", error);
+        alert(`Error al quitar del carrito: ${error.message}`);
+      });
   };
 
   const vaciarCarrito = () => {

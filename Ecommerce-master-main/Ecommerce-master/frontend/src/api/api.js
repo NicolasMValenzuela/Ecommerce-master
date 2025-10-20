@@ -24,8 +24,20 @@ return fetch(`http://localhost:4002${url}`, config)
         if (response.status === 401 || response.status === 403) {
         localStorage.removeItem('accessToken');
         window.location.href = '/login';
+        return Promise.reject(new Error('No autorizado - sesión expirada'));
         }
-        throw new Error('Respuesta de red no fue exitosa');
+        
+        // Intentar obtener el mensaje de error del backend
+        return response.text().then(errorText => {
+            let errorMessage = 'Error del servidor';
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorJson.error || errorText;
+            } catch (e) {
+                errorMessage = errorText || `Error ${response.status}: ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+        });
     }
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -33,5 +45,13 @@ return fetch(`http://localhost:4002${url}`, config)
     } else {
         return {};
     }
+    })
+    .catch(error => {
+        // Si es un error de red (backend no disponible)
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            throw new Error('No se pudo conectar al servidor. Verifica que el backend esté ejecutándose en el puerto 4002.');
+        }
+        // Re-lanzar otros errores
+        throw error;
     });
 };
