@@ -54,6 +54,10 @@ public class Pedido {
     private List<Vehiculo> vehiculos;
 
     @ManyToOne
+    @JoinColumn(name = "idVehiculo", nullable = true) // FK directa para vehículo principal/referencia
+    private Vehiculo vehiculoPrincipal;
+
+    @ManyToOne
     @JoinColumn(name = "idFormadePago", nullable = false) // FK a formas_de_pago
     @Enumerated(EnumType.STRING)
     private FormaDePago formaDePago;

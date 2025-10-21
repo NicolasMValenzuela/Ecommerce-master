@@ -132,16 +132,23 @@ public class CarritoServiceImpl implements CarritoService {
                 break;
         }
         
-        List<Vehiculo> vehiculosDelPedido = carrito.getCarritoVehiculos().stream()
+        // Obtener todos los vehículos del carrito
+        List<Vehiculo> vehiculosDelCarrito = carrito.getCarritoVehiculos().stream()
             .map(CarritoVehiculo::getVehiculo)
             .collect(Collectors.toList());
+        
+        // Tomar el primer vehículo como principal (opcional)
+        Vehiculo vehiculoPrincipal = vehiculosDelCarrito.isEmpty() ? 
+            null : vehiculosDelCarrito.get(0);
 
         // 4. Construir el pedido con el costoFinal ya calculado
         Pedido pedido = Pedido.builder()
             .cliente(carrito.getCliente())
-            .vehiculos(vehiculosDelPedido)
+            .vehiculos(vehiculosDelCarrito) // Lista de todos los vehículos
+            .vehiculoPrincipal(vehiculoPrincipal) // Vehículo principal como referencia
             .costoTotal(costoFinal) // Usamos el costo con el descuento aplicado
             .formaDePago(formaDePago)
+            .fechaDeCreacion(LocalDateTime.now())
             .estado("PENDIENTE_PAGO")
             .build();
 
