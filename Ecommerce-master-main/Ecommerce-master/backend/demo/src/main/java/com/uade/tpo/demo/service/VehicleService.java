@@ -25,10 +25,8 @@ public class VehicleService {
     }
 
     public List<Vehiculo> getAllVehicles() {
-    return vehicleRepository.findAll().stream()
-            .filter(vehiculo -> vehiculo.getStock() != null && vehiculo.getStock() > 0)
-            .collect(java.util.stream.Collectors.toList());
-    }
+    return vehicleRepository.findAll();
+}
 
     public Optional<Vehiculo> getVehicleById(Long id) {
         return vehicleRepository.findById(id);

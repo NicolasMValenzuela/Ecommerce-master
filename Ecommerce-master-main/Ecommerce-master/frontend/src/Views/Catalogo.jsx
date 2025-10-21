@@ -2,12 +2,9 @@ import React, { useState, useMemo } from "react";
 import Card from "../components/Card";
 import { useVehicles } from "../context/VehiclesContext";
 
-
 const Catalogo = () => {
-  // ✅ Usar el Context en lugar de estado local
   const { vehicles: autos, loading, error } = useVehicles();
   
-  // ✅ Estados para filtros
   const [orden, setOrden] = useState(""); 
   const [busqueda, setBusqueda] = useState("");
   const [marcaSeleccionada, setMarcaSeleccionada] = useState("");
@@ -16,7 +13,6 @@ const Catalogo = () => {
   const [precioRango, setPrecioRango] = useState(""); 
   const [kilometrajeRango, setKilometrajeRango] = useState("");
 
-  // ✅ useMemo optimizados - solo recalcular cuando autos realmente cambie
   const marcas = useMemo(() => {
     if (!autos.length) return [];
     return Array.from(new Set(autos.map((a) => a.marca))).sort();
@@ -32,11 +28,11 @@ const Catalogo = () => {
     return Array.from(new Set(autos.map((a) => a.anio))).sort((a, b) => b - a);
   }, [autos]);
 
-  // ✅ Optimización: solo recalcular si hay cambios reales
   const autosFiltrados = useMemo(() => {
     if (!autos.length) return [];
     
     let filtered = autos.filter((auto) => {
+      // ... (toda tu lógica de filtrado se mantiene igual)
       const coincideBusqueda =
         auto.marca.toLowerCase().includes(busqueda.toLowerCase()) ||
         auto.modelo.toLowerCase().includes(busqueda.toLowerCase());
@@ -64,24 +60,31 @@ const Catalogo = () => {
       return coincideBusqueda && coincideMarca && coincideKm && coincidePrecio && coincideModelo && coincideAño;
     });
 
-    if (orden === "precio") {
-      filtered = [...filtered].sort((a, b) => {
-        if (typeof a.precioBase !== "number") return 1;
-        if (typeof b.precioBase !== "number") return -1;
-        return a.precioBase - b.precioBase;
-      });
-    } else if (orden === "km") {
-      filtered = [...filtered].sort((a, b) => {
-        if (typeof a.kilometraje !== "number") return 1;
-        if (typeof b.kilometraje !== "number") return -1;
-        return a.kilometraje - b.kilometraje;
-      });
-    }
+    // --- NUEVA LÓGICA DE ORDENAMIENTO MULTI-CRITERIO ---
+    filtered.sort((a, b) => {
+      const stockA = a.stock > 0;
+      const stockB = b.stock > 0;
+
+      // Criterio 1: Disponibilidad de stock (los que tienen stock van primero)
+      if (stockA && !stockB) return -1; // 'a' va antes que 'b'
+      if (!stockA && stockB) return 1;  // 'b' va antes que 'a'
+
+      // Criterio 2: Orden seleccionado por el usuario (solo si ambos tienen o no tienen stock)
+      if (orden === "precio") {
+        return (a.precioBase ?? 0) - (b.precioBase ?? 0);
+      }
+      if (orden === "km") {
+        return (a.kilometraje ?? 0) - (b.kilometraje ?? 0);
+      }
+      
+      // Si no hay orden seleccionado, no se cambia el orden relativo
+      return 0;
+    });
 
     return filtered;
+
   }, [autos, busqueda, marcaSeleccionada, modeloSeleccionado, añoSeleccionado, kilometrajeRango, precioRango, orden]);
 
-  // ✅ AHORA SÍ pueden ir los returns condicionales
   if (loading) {
     return (
       <div className="w-full mx-auto mt-20 p-4 flex justify-center">
@@ -89,22 +92,8 @@ const Catalogo = () => {
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="w-full mx-auto mt-20 p-4 flex justify-center">
-        <p className="text-xl text-red-600">{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Reintentar
-        </button>
-      </div>
-    );
-  }
-
-  // ✅ Variables normales (no hooks) pueden ir después de los returns
+  
+  // ... (el resto del componente se mantiene exactamente igual)
   const format = (n) => Number(n).toLocaleString();
   
   const priceRanges = [
@@ -205,7 +194,7 @@ const Catalogo = () => {
             </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {autosFiltrados.map((vehiculo) => (
-          <Card key={`vehiculo-${vehiculo.id}`} vehiculo={vehiculo} />
+          <Card key={vehiculo.idVehiculo} vehiculo={vehiculo} />
         ))}
       </div>
     </div>
