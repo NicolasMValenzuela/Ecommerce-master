@@ -92,6 +92,20 @@ const Navbar = () => {
                 </Link>
               </li>
             )}
+            {isAuthenticated && user && user.role === 'USER' && (
+              <li>
+                <Link to="/mis-pedidos" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                  Mis Pedidos
+                </Link>
+              </li>
+            )}
+            {isAuthenticated && user && user.role === 'ADMIN' && (
+              <li>
+                <Link to="/admin/pedidos" className="bg-yellow-500 text-black px-3 py-1 rounded text-sm hover:bg-yellow-400 transition-colors">
+                  Gestionar Pedidos
+                </Link>
+              </li>
+            )}
           </ul>
 
           {/* Botón Hamburguesa para Móvil */}
@@ -218,6 +232,17 @@ const Navbar = () => {
                 className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
               >
                 Login
+              </Link>
+            )}
+
+            {isAuthenticated && user && user.role === 'USER' && (
+              <Link to="/mis-pedidos" onClick={closeMenu} className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                Mis Pedidos
+              </Link>
+            )}
+            {isAuthenticated && user && user.role === 'ADMIN' && (
+              <Link to="/admin/pedidos" onClick={closeMenu} className="text-yellow-400 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                Gestionar Pedidos
               </Link>
             )}
           </div>

@@ -1,15 +1,8 @@
 package com.uade.tpo.demo.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.uade.tpo.demo.entity.Carrito;
 import com.uade.tpo.demo.entity.CarritoVehiculo;
+import com.uade.tpo.demo.entity.EstadoPedido;
 import com.uade.tpo.demo.entity.FormaDePago;
 import com.uade.tpo.demo.entity.Pedido;
 import com.uade.tpo.demo.entity.User;
@@ -17,9 +10,15 @@ import com.uade.tpo.demo.entity.Vehiculo;
 import com.uade.tpo.demo.repository.CarritoRepository;
 import com.uade.tpo.demo.repository.CarritoVehiculoRepository;
 import com.uade.tpo.demo.repository.PedidoRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.uade.tpo.demo.repository.VehicleRepository;
 
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime; // <-- LÍNEA AGREGADA
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +97,6 @@ public class CarritoServiceImpl implements CarritoService {
             throw new RuntimeException("El carrito está vacío, no se puede generar un pedido.");
         }
 
-        // 1. Validar stock y actualizarlo (esto ya lo tenías bien)
         for (CarritoVehiculo item : carrito.getCarritoVehiculos()) {
             Vehiculo vehiculo = item.getVehiculo();
             int cantidadPedida = item.getCantidad();
@@ -113,48 +111,38 @@ public class CarritoServiceImpl implements CarritoService {
         carrito.setEstado("CONFIRMADO");
         carritoRepository.save(carrito);
 
-        // 2. Calcular subtotal sin descuento
         double subtotal = carrito.getCarritoVehiculos().stream()
             .mapToDouble(item -> item.getValor() * item.getCantidad())
             .sum();
-
-        // 3. --- LÓGICA DE DESCUENTO AGREGADA ---
+            
         double costoFinal = subtotal;
         switch (formaDePago.getFormaDePago()) {
             case EFECTIVO:
-                costoFinal *= 0.90; // Aplicamos 10% de descuento
+                costoFinal *= 0.90; 
                 break;
             case TRANSFERENCIA:
-                costoFinal *= 0.95; // Aplicamos 5% de descuento
+                costoFinal *= 0.95;
                 break;
             case TARJETA:
-                // No se aplica descuento
                 break;
         }
-        
-        // Obtener todos los vehículos del carrito
-        List<Vehiculo> vehiculosDelCarrito = carrito.getCarritoVehiculos().stream()
+
+        List<Vehiculo> vehiculosDelPedido = carrito.getCarritoVehiculos().stream()
             .map(CarritoVehiculo::getVehiculo)
             .collect(Collectors.toList());
-        
-        // Tomar el primer vehículo como principal (opcional)
-        Vehiculo vehiculoPrincipal = vehiculosDelCarrito.isEmpty() ? 
-            null : vehiculosDelCarrito.get(0);
 
-        // 4. Construir el pedido con el costoFinal ya calculado
         Pedido pedido = Pedido.builder()
             .cliente(carrito.getCliente())
-            .vehiculos(vehiculosDelCarrito) // Lista de todos los vehículos
-            .vehiculoPrincipal(vehiculoPrincipal) // Vehículo principal como referencia
-            .costoTotal(costoFinal) // Usamos el costo con el descuento aplicado
+            .vehiculos(vehiculosDelPedido)
+            .costoTotal(costoFinal)
             .formaDePago(formaDePago)
             .fechaDeCreacion(LocalDateTime.now())
-            .estado("PENDIENTE_PAGO")
+            .estado(EstadoPedido.PAGADO)
             .build();
 
         return pedidoRepository.save(pedido);
     }
-    
+
     @Override
     @Transactional
     public Carrito getOrCreateCarritoForUser(User user) {

@@ -14,6 +14,8 @@ import FormularioVehiculo from "./Views/FormularioVehiculo";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { CarritoProvider } from "./context/CarritoContext";
 import { VehiclesProvider } from "./context/VehiclesContext";
+import MisPedidos from "./Views/MisPedidos";
+import GestionPedidos from "./Views/GestionPedidos";
 
 function App() {
   return (
@@ -54,6 +56,23 @@ function App() {
             element={
               <ProtectedRoute requiredRole="ADMIN">
                 <FormularioVehiculo />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Rutas de Pedidos */}
+          <Route 
+            path="/mis-pedidos"
+            element={
+              <ProtectedRoute requiredRole="USER">
+                <MisPedidos />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/pedidos"
+            element={
+              <ProtectedRoute requiredRole="ADMIN">
+                <GestionPedidos />
               </ProtectedRoute>
             } 
           />

@@ -54,15 +54,15 @@ public class Pedido {
     private List<Vehiculo> vehiculos;
 
     @ManyToOne
-    @JoinColumn(name = "idVehiculo", nullable = true) // FK directa para vehículo principal/referencia
+    @JoinColumn(name = "idVehiculo", nullable = true)
     private Vehiculo vehiculoPrincipal;
 
     @ManyToOne
-    @JoinColumn(name = "idFormadePago", nullable = false) // FK a formas_de_pago
-    @Enumerated(EnumType.STRING)
+    @JoinColumn(name = "idFormadePago", nullable = false)
     private FormaDePago formaDePago;
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
-    private String estado = "PENDIENTE_PAGO";
+    private EstadoPedido estado = EstadoPedido.PAGADO;
 }

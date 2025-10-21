@@ -1,5 +1,6 @@
 package com.uade.tpo.demo.service;
 
+import com.uade.tpo.demo.entity.EstadoPedido;
 import com.uade.tpo.demo.entity.Pedido;
 import com.uade.tpo.demo.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,6 @@ public class PedidoServiceImpl implements PedidoService {
     public Pedido updatePedido(Long id, Pedido pedidoDetails) {
         Pedido pedido = pedidoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Pedido not found"));
-        // No actualizamos fechaDeCreacion
         pedido.setCostoTotal(pedidoDetails.getCostoTotal());
         pedido.setCliente(pedidoDetails.getCliente());
         pedido.setVehiculos(pedidoDetails.getVehiculos());
@@ -49,5 +49,18 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public void deletePedido(Long id) {
         pedidoRepository.deleteById(id);
+    }
+
+    @Override
+    public Pedido updatePedidoEstado(Long id, EstadoPedido estado) {
+        Pedido pedido = pedidoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        pedido.setEstado(estado);
+        return pedidoRepository.save(pedido);
+    }
+
+    @Override
+    public List<Pedido> getPedidosByClienteId(Long clienteId) {
+        return pedidoRepository.findByClienteIdCliente(clienteId);
     }
 }

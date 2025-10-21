@@ -31,12 +31,14 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(req -> req.requestMatchers("/api/v1/auth/**").permitAll()
+        .authorizeHttpRequests(req -> req
+                .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/error/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/vehicles/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/categories").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/vehicles/**", "/categories/**").permitAll()
+                
+                .requestMatchers(HttpMethod.GET, "/pedidos/mis-pedidos").hasRole("USER")
+                .requestMatchers("/pedidos/**").hasRole("ADMIN")
+
                 .requestMatchers("/carritos/**").authenticated()
                 .anyRequest().authenticated())
         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
