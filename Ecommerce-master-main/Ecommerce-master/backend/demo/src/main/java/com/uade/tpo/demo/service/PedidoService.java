@@ -1,5 +1,6 @@
 package com.uade.tpo.demo.service;
 
+import com.uade.tpo.demo.dto.PedidoDTO;
 import com.uade.tpo.demo.entity.EstadoPedido;
 import com.uade.tpo.demo.entity.Pedido;
 
@@ -8,10 +9,10 @@ import java.util.Optional;
 
 public interface PedidoService {
     Pedido createPedido(Pedido pedido);
-    List<Pedido> getAllPedidos();
     Optional<Pedido> getPedidoById(Long id);
     Pedido updatePedido(Long id, Pedido pedidoDetails);
     void deletePedido(Long id);
+    List<PedidoDTO> getAllPedidos();
+    List<PedidoDTO> getPedidosByClienteId(Long clienteId);
     Pedido updatePedidoEstado(Long id, EstadoPedido estado);
-    List<Pedido> getPedidosByClienteId(Long clienteId);
 }

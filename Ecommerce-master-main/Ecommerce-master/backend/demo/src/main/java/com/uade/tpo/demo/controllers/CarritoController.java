@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map; // <-- Importante: importar Map
 
 @RestController
 @RequestMapping("/carritos")
@@ -26,6 +27,8 @@ public class CarritoController {
 
     private final CarritoService carritoService;
     private final FormaDePagoRepository formaDePagoRepository;
+
+    // ... (los otros métodos como createCarrito, getCarrito, etc., se mantienen igual) ...
 
     @PostMapping
     public ResponseEntity<CarritoDTO> createCarrito(@RequestBody Carrito carrito) {
@@ -53,21 +56,31 @@ public class CarritoController {
         return ResponseEntity.noContent().build();
     }
 
-    // Reemplaza el método checkout() existente por este:
+    // --- MÉTODO CHECKOUT CORREGIDO ---
     @PostMapping("/{id}/checkout")
-    public ResponseEntity<Pedido> checkout(@PathVariable Long id, @RequestBody FormaDePago formaDePago) {
-        // Primero, persistimos la forma de pago si es necesario.
-        FormaDePago.TipoFormaDePago tipo = formaDePago.getFormaDePago();
-        FormaDePago formaPersist = formaDePagoRepository.findByFormaDePago(tipo).orElseGet(() -> {
-            return formaDePagoRepository.save(formaDePago);
-        });
+    public ResponseEntity<Pedido> checkout(@PathVariable Long id, @RequestBody Map<String, String> requestBody) {
+        // 1. Extraemos el String "TARJETA", "EFECTIVO", etc., del cuerpo del JSON.
+        String tipoDePagoStr = requestBody.get("formaDePago");
+        if (tipoDePagoStr == null) {
+            return ResponseEntity.badRequest().build(); // Si no envían la forma de pago, es un error.
+        }
 
-        // Llamamos al servicio con la lógica centralizada.
+        // 2. Convertimos el String a nuestro tipo Enum.
+        FormaDePago.TipoFormaDePago tipo = FormaDePago.TipoFormaDePago.valueOf(tipoDePagoStr);
+        
+        // 3. Buscamos la entidad FormaDePago en la base de datos o la creamos si no existe.
+        FormaDePago formaPersist = formaDePagoRepository.findByFormaDePago(tipo)
+            .orElseGet(() -> {
+                FormaDePago nuevaForma = new FormaDePago();
+                nuevaForma.setFormaDePago(tipo);
+                return formaDePagoRepository.save(nuevaForma);
+            });
+
+        // 4. Llamamos al servicio con la entidad correcta.
         Pedido nuevoPedido = carritoService.confirmarCarritoYGenerarPedido(id, formaPersist);
         return ResponseEntity.ok(nuevoPedido);
     }
 
-    // Simple mapper to DTO to avoid serializing JPA entities and session issues
     private CarritoDTO mapToDto(Carrito c) {
         CarritoDTO dto = new CarritoDTO();
         dto.setIdCarrito(c.getIdCarrito());
@@ -93,5 +106,5 @@ public class CarritoController {
         }
         Carrito carrito = carritoService.getOrCreateCarritoForUser(user);
         return ResponseEntity.ok(mapToDto(carrito));
-}
+    }
 }

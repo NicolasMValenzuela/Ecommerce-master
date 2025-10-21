@@ -8,7 +8,6 @@ export default function Carrito() {
   const navigate = useNavigate();
   const [formaDePago, setFormaDePago] = useState("TARJETA");
 
-  // --- LÓGICA DE CÁLCULO EN TIEMPO REAL ---
   const { subtotal, descuento, total } = useMemo(() => {
     if (!carrito || !carrito.items || carrito.items.length === 0) {
       return { subtotal: 0, descuento: 0, total: 0 };
@@ -79,21 +78,21 @@ export default function Carrito() {
           <div className="md:col-span-2">
             <h3 className="text-xl font-semibold mb-4 text-gray-700">Productos</h3>
             <ul className="space-y-4">
-              {carrito.items.map((item, index) => (
-                <li key={`carrito-item-${item.vehiculoId}-${index}`} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-                  <div>
-                    <span className="font-semibold text-gray-800">Vehículo ID: {item.vehiculoId}</span>
-                    <p className="text-sm text-gray-500">Valor: ${item.valor?.toLocaleString('es-AR') || '0,00'}</p>
-                  </div>
-                  <button
-                    className="text-red-500 hover:text-red-700 font-medium"
-                    onClick={() => quitarDelCarrito(item.id)}
-                  >
-                    Quitar
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {carrito.items.map((item) => (
+              <li key={item.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+                <div>
+                  <span className="font-semibold text-gray-800">Vehículo ID: {item.vehiculoId}</span>
+                  <p className="text-sm text-gray-500">Valor: ${item.valor?.toLocaleString('es-AR') || '0,00'}</p>
+                </div>
+                <button
+                  className="text-red-500 hover:text-red-700 font-medium"
+                  onClick={() => quitarDelCarrito(item.id)}
+                >
+                  Quitar
+                </button>
+              </li>
+            ))}
+          </ul>
 
             <div className="mt-8">
               <h3 className="text-xl font-semibold mb-4 text-gray-700">Forma de Pago</h3>

@@ -32,7 +32,7 @@ public class Pedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idPedido") // nombre en snake_case
+    @Column(name = "idPedido")
     private Long idPedido;
 
     @Builder.Default
@@ -43,7 +43,7 @@ public class Pedido {
     private Double costoTotal;
 
     @ManyToOne
-    @JoinColumn(name = "idCliente", nullable = false) // FK a users
+    @JoinColumn(name = "idCliente", nullable = false)
     private User cliente;
 
     @ManyToMany
@@ -52,10 +52,6 @@ public class Pedido {
     joinColumns = @JoinColumn(name = "idPedido"), 
     inverseJoinColumns = @JoinColumn(name = "idVehiculo"))
     private List<Vehiculo> vehiculos;
-
-    @ManyToOne
-    @JoinColumn(name = "idVehiculo", nullable = true)
-    private Vehiculo vehiculoPrincipal;
 
     @ManyToOne
     @JoinColumn(name = "idFormadePago", nullable = false)

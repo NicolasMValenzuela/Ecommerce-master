@@ -2,6 +2,7 @@ package com.uade.tpo.demo.controllers;
 
 import com.uade.tpo.demo.entity.Pedido;
 import com.uade.tpo.demo.entity.User;
+import com.uade.tpo.demo.dto.PedidoDTO;
 import com.uade.tpo.demo.entity.EstadoPedido;
 import com.uade.tpo.demo.service.PedidoService;
 
@@ -22,20 +23,17 @@ public class PedidoController {
         this.pedidoService = pedidoService;
     }
 
-    // ... (métodos POST, GET all, GET by id, etc. existentes)
-
     @GetMapping
-    public ResponseEntity<List<Pedido>> getAllPedidos() {
+    public ResponseEntity<List<PedidoDTO>> getAllPedidos() {
         return ResponseEntity.ok(pedidoService.getAllPedidos());
     }
 
-    // NUEVO ENDPOINT PARA CLIENTES
     @GetMapping("/mis-pedidos")
-    public ResponseEntity<List<Pedido>> getMisPedidos(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<PedidoDTO>> getMisPedidos(@AuthenticationPrincipal User user) {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
-        List<Pedido> pedidos = pedidoService.getPedidosByClienteId(user.getIdCliente());
+        List<PedidoDTO> pedidos = pedidoService.getPedidosByClienteId(user.getIdCliente());
         return ResponseEntity.ok(pedidos);
     }
 
@@ -47,7 +45,7 @@ public class PedidoController {
             Pedido pedidoActualizado = pedidoService.updatePedidoEstado(id, nuevoEstado);
             return ResponseEntity.ok(pedidoActualizado);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build(); // Si el estado no es válido
+            return ResponseEntity.badRequest().build();
         }
     }
 }
